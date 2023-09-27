@@ -1,10 +1,10 @@
 module Api
   class OrdersController < ActionController::Base
     include ApiHelper
+    skip_before_action :verify_authenticity_token
 
     # GET /api/orders
     def index
-      skip_before_action :verify_authenticity_token
 
       user_type = params[:type]
       id = params[:id]
