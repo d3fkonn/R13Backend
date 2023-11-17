@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :users
   get 'order_statuses/index'
   get 'order_statuses/show'
   get 'order_statuses/new'

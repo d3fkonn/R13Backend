@@ -23,6 +23,8 @@ module Api
       render json: orders.map(&method(:format_order_long)), status: :ok
     end
 
+
+    
     # POST /api/orders
     def create
       restaurant_id, customer_id, products = params.values_at(:restaurant_id, :customer_id, :products)

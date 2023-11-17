@@ -7,11 +7,14 @@ class RestaurantsController < ApplicationController
     @restaurant = Restaurant.find_by(id: id)
     if @restaurant
       render json: format_restaurants_response(@restaurant)
+      return;
     else
       render json: { error: "Restaurant with ID #{id} not found." }, status: :not_found
     end
 
   end
+
+  
 
   def format_restaurants_response(restaurant)
          {

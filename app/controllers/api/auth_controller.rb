@@ -9,6 +9,7 @@ module Api
       password = data["password"]
       user = User.find_by(email: email)
       customer = Customer.find_by(user_id: user&.id)
+      courier = Courier.find_by(user_id: user&.id)
 
       if user && user.valid_password?(password)
         render json: { success: true, user_id: user.id, customer_id: customer&.id, courier_id: courier&.id }
