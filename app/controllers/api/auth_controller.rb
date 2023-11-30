@@ -14,7 +14,8 @@ module Api
       if user && user.valid_password?(password)
         render json: { success: true, user_id: user.id, customer_id: customer&.id, courier_id: courier&.id }
       else
-        render json: { success: false }, status: :unauthorized
+        render json: { success: false, email: email, password: password }, status: :unauthorized
+       
       end
     end
 
