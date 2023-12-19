@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'twilio-ruby'
 module Api
   class OrdersController < ActionController::Base
     include ApiHelper
@@ -28,7 +30,6 @@ module Api
     # POST /api/orders
     def create
       restaurant_id, customer_id, products = params.values_at(:restaurant_id, :customer_id, :products)
-      skip_before_action :verify_authenticity_token
 
 
       # Validate required parameters
@@ -63,9 +64,26 @@ module Api
         order.product_orders.create!(product_id: product.id, product_quantity: product_params[:quantity].to_i, product_unit_cost: product.cost)
       end
 
-      render json: format_order_long(order), status: :created
+ # If sms parameters, use method to send sms confirmation
+ if params[:send_sms] == true
+  customer_phone_number = order.customer.phone
+  restaurant_phone_number = ENV['TWILIO_PHONE_NUMBER']
+  send_sms_notification(customer_phone_number, "Your order has been confirmed!")
+  # send_sms_notification(restaurant_phone_number, "You have a new order!")
+end
+
+# If email parameters, use method to send email confirmation
+if params[:send_email] == true
+  customer_email = order.customer.email
+  send_notify_email(customer_email, order)
+  render json: send_notify_email
+end
+      render json: format_order_long(order),status: :created
     end
 
+
+
+    
     # POST /api/order/:id/status
     def set_status
       status = params[:status]
@@ -99,6 +117,78 @@ module Api
     end
 
     private
+
+
+    def send_sms_notification(phone_number, message)
+      account_sid = ENV['TWILIO_ACCOUNT_SID']
+      auth_token = ENV['TWILIO_AUTH_TOKEN']
+      client = Twilio::REST::Client.new(account_sid, auth_token)
+
+      message = client.messages.create(
+        body: message,
+        from: ENV['TWILIO_PHONE_NUMBER'],
+        to: phone_number
+      )
+      puts message.sid
+    end
+
+    # Method to send email confirmation
+    def send_notify_email(email, order)
+      notify_secret_key = ENV['NOTIFY_SECRET_KEY']
+      notify_client_id = ENV['NOTIFY_CLIENT_ID']
+      notify_template_id = ENV['NOTIFY_TEMPLATE_ID']
+
+      url = "https://api.notify.eu/notification/send"
+
+      headers = {
+        'Content-Type' => 'application/json',
+        'X-ClientId' => notify_client_id,
+        'X-SecretKey' => notify_secret_key
+      }
+
+      payload = {
+        message: {
+          notificationType: notify_template_id,
+          language: "en",
+          params: {
+            order_id: order.id,
+            customer_name: order.customer&.user&.name,
+            restaurant_name: order.restaurant.name,
+            order_total_cost: format_cents_to_currency(order.total_cost),
+          },
+          transport: [
+            {
+              type: "Rocket_Delivery_Email",
+              recipients: {
+                to: [
+                  {
+                    name: order.customer&.user&.name,
+                    recipient: email
+                  }
+                ]
+              },
+            }
+          ]
+        }
+      }
+
+      response = HTTParty.post(url, headers: headers, body: payload.to_json)
+
+      # Handle the Notify.eu response as needed
+      if response.success?
+        puts "Email notification sent"
+        render json: response
+        nil
+      else
+        render_422_error("Failed to send email notification")
+      end
+    end
+
+    # Currency Formatter
+    def format_cents_to_currency(cents)
+      amount_in_dollars = cents.to_f / 100
+      sprintf("$%.2f", amount_in_dollars)
+    end
 
     # Formats an order to its long form, in json
     def format_order_long(order)

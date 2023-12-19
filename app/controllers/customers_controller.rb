@@ -10,6 +10,14 @@ class CustomersController < ApplicationController
 
   # GET /customers/1 or /customers/1.json
   def show
+    id = params[:id]
+    @customer = Customer.find_by(id: id)
+    if @customer
+      render json: @customer
+      return;
+    else
+      render json: { error: "Customer with ID #{id} not found." }, status: :not_found
+    end
   end
 
   # GET /customers/new
@@ -23,14 +31,13 @@ class CustomersController < ApplicationController
 
   # POST /customers or /customers.json
   def create
-    @customer = Customer.new(customer_params)
+    @customer = Customer.create(customer_params)
 
     respond_to do |format|
       if @customer.save
         format.html { redirect_to customer_url(@customer), notice: "Customer was successfully created." }
         format.json { render :show, status: :created, location: @customer }
       else
-        format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @customer.errors, status: :unprocessable_entity }
       end
     end
@@ -38,14 +45,19 @@ class CustomersController < ApplicationController
 
   # PATCH/PUT /customers/1 or /customers/1.json
   def update
-    respond_to do |format|
-      if @customer.update(customer_params)
-        format.html { redirect_to customer_url(@customer), notice: "Customer was successfully updated." }
-        format.json { render :show, status: :ok, location: @customer }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @customer.errors, status: :unprocessable_entity }
-      end
+    id = params[:id]
+    data = JSON.parse(request.body.read)
+    email = data["email"]
+    address_id = data["address_id"]
+    user_id = data["user_id"]
+    active = data["active"]
+    phone = data["phone"]
+
+    @customer = Customer.find_by(id: id)
+    if @customer.update(email: email, phone: phone, address_id: address_id, user_id: user_id, active: active)
+      render json: @customer
+    else
+      render json: { errors: @customer.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

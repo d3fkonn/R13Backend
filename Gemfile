@@ -46,7 +46,8 @@ gem "devise"
 gem 'bootstrap', '~> 5.2.3'
 gem 'faker'
 gem 'rack-cors', :require => 'rack/cors'
-
+gem 'figaro'
+gem 'twilio-ruby'
 # Use Sass to process CSS
 # gem "sassc-rails"
 

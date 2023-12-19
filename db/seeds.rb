@@ -4,7 +4,14 @@ erica_address = Address.create!(street_address: "123 CodeBoxx Boulevard", city: 
 
 # Erica is an employee!
 Employee.create!(user_id: erica.id, address_id: erica_address.id, phone: "5141231234", email: "erica.ger@codeboxxacademy.com")
-
+Customer.create!(
+  user_id: erica.id,
+  address_id: erica_address.id,
+    phone: Faker::PhoneNumber.phone_number,
+    email: Faker::Internet.unique.email,
+    active: true
+  )
+ 
 # Generate users
 20.times do
   User.create!(
@@ -60,7 +67,14 @@ end
     active: true
   )
 end
-
+Courier.create!(
+  user_id: erica.id,
+  address_id: erica_address.id,
+  courier_status_id: rand(1..courier_statuses.size),
+  phone: Faker::PhoneNumber.phone_number,
+  email: Faker::Internet.unique.email,
+  active: true
+)
 # Generate restaurants
 8.times do
   Restaurant.create!(
@@ -88,7 +102,7 @@ Restaurant.all.each do |restaurant|
     Product.create!(
       restaurant_id: restaurant.id,
       name: Faker::Food.unique.dish,
-      cost: rand(0..20)*100 + rand(0..3)*25 + [00,25,50,75,99].sample
+      cost: rand(0..20)*10 + rand(0..3)*2.5 + [0.00,0.25,0.50,0.75,0.99].sample
     )
   end
 end

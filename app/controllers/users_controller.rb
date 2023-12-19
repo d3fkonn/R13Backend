@@ -8,6 +8,31 @@ class UsersController < ApplicationController
 
   # GET /users/1 or /users/1.json
   def show
+    id = params[:id]
+    @user = User.find_by(id: id)
+    if @user
+      render json: @user
+      return;
+    else
+      render json: { error: "user with ID #{id} not found." }, status: :not_found
+    end
+
+  end
+
+  
+
+  def format_users_response(user)
+         {
+        id: user.id,
+        customer_id: user.customer.id,
+        user_address: user.address&.street_address,
+        user_name: user.name,
+        user_email: user.email,
+        user_phone: user.customer.phone,
+        courier_id: user.courier.id,
+
+      }
+  
   end
 
   # GET /users/new
@@ -60,11 +85,10 @@ class UsersController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
-      @user = User.find(params[:email && :password])
     end
 
     # Only allow a list of trusted parameters through.
     def user_params
-      params.fetch(:user, {})
+      params.fetch(:user, :id, {})
     end
 end

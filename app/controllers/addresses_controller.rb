@@ -5,7 +5,13 @@ class AddressesController < ApplicationController
 
   # GET /addresses or /addresses.json
   def index
-    @addresses = Address.all
+    addresses = Address.all
+    if addresses
+      render json: addresses
+    else
+      render json: { success: false }, status: :unauthorized
+     
+    end
   end
 
   # GET /addresses/1 or /addresses/1.json

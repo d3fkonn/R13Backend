@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+ resources :couriers
   resources :users
   get 'order_statuses/index'
   get 'order_statuses/show'
@@ -32,15 +33,16 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   root "home#index"
   resources :employees
-  
+  resources :customers
   # API
   namespace :api do
     post "login", to: "auth#index"
     get "restaurants", to: "restaurants#index"
     get "products", to: "products#index"
     get "orders", to: "orders#index"
-    post "orders", to: "orders#create"
-    post "order/:id/status", to: "orders#set_status"
+    post "orders/:send_sms/:send_email", to: "orders#create"
+    post "order/:id/:status", to: "orders#set_status"
     post "order/:id/rating", to: "orders#set_rating"
+
   end
 end

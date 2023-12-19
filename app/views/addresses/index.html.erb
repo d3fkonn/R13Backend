@@ -1,2 +1,9 @@
-<h1>Addresses#index</h1>
-<p>Find me in app/views/addresses/index.html.erb</p>
+   
+    <% @addresses.each do |address| %>
+    
+    {
+       street_address: <%= address.street_address %>,
+        city: <%= address.city %>,
+          postal_code: <%= address.postal_code %>
+    }
+    <% end %>
